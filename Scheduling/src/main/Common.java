@@ -1,5 +1,7 @@
 package main;
 
+import java.util.Random;
+
 public class Common {
   static public int s2i (String s) {
     int i = 0;
@@ -12,7 +14,7 @@ public class Common {
   }
 
   static public double R1 () {
-    java.util.Random generator = new java.util.Random(System.currentTimeMillis());
+    Random generator = new java.util.Random(System.currentTimeMillis());
     double U = generator.nextDouble();
     double V = generator.nextDouble();
     double X =  Math.sqrt((8/Math.E)) * (V - 0.5)/U;
