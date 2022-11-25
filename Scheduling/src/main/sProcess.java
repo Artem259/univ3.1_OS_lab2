@@ -1,6 +1,7 @@
 package main;
 
 public class sProcess {
+    private int arrivaltime;
     private int cputime;
     private int ioblocking;
     private int cpudone;
@@ -8,6 +9,7 @@ public class sProcess {
     private int numblocked;
 
     public sProcess() {
+        this.arrivaltime = 0;
         this.cputime = 0;
         this.ioblocking = 0;
         this.cpudone = 0;
@@ -15,12 +17,21 @@ public class sProcess {
         this.numblocked = 0;
     }
 
-    public sProcess(int cputime, int ioblocking, int cpudone, int ionext, int numblocked) {
+    public sProcess(int arrivaltime, int cputime, int ioblocking, int cpudone, int ionext, int numblocked) {
+        this.arrivaltime = arrivaltime;
         this.cputime = cputime;
         this.ioblocking = ioblocking;
         this.cpudone = cpudone;
         this.ionext = ionext;
         this.numblocked = numblocked;
+    }
+
+    public int getArrivaltime() {
+        return arrivaltime;
+    }
+
+    public void setArrivaltime(int arrivaltime) {
+        this.arrivaltime = arrivaltime;
     }
 
     public int getCputime() {

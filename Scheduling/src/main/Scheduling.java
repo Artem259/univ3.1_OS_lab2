@@ -44,11 +44,6 @@ public class Scheduling {
         this.processFile = processFile;
         this.resultsFile = resultFile;
 
-        int i;
-        String line;
-        int cputime;
-        int ioblocking;
-        double X;
 
         File f = new File(configFile);
         if (!(f.exists())) {
@@ -61,6 +56,7 @@ public class Scheduling {
         }
         System.out.println("Working...");
 
+        String line;
         try (BufferedReader in = new BufferedReader(new FileReader(f))) {
             while ((line = in.readLine()) != null) {
                 if (line.startsWith("numprocess")) {
@@ -81,14 +77,15 @@ public class Scheduling {
                 if (line.startsWith("process")) {
                     StringTokenizer st = new StringTokenizer(line);
                     st.nextToken();
-                    ioblocking = Common.s2i(st.nextToken());
-                    X = Common.R1();
+                    int arrivaltime = Common.s2i(st.nextToken());
+                    int ioblocking = Common.s2i(st.nextToken());
+                    double X = Common.R1();
                     while (X == -1.0) {
                         X = Common.R1();
                     }
                     X = X * standardDev;
-                    cputime = (int) X + meanDev;
-                    processVector.add(new sProcess(cputime, ioblocking, 0, 0, 0));
+                    int cputime = (int) X + meanDev;
+                    processVector.add(new sProcess(arrivaltime, cputime, ioblocking, 0, 0, 0));
                 }
                 if (line.startsWith("runtime")) {
                     StringTokenizer st = new StringTokenizer(line);
@@ -102,15 +99,15 @@ public class Scheduling {
         }
 
         if (processVector.size() < processnum) {
-            i = 0;
+            int i = 0;
             while (processVector.size() < processnum) {
-                X = Common.R1();
+                double X = Common.R1();
                 while (X == -1.0) {
                     X = Common.R1();
                 }
                 X = X * standardDev;
-                cputime = (int) X + meanDev;
-                processVector.add(new sProcess(cputime,i*100,0,0,0));
+                int cputime = (int) X + meanDev;
+                processVector.add(new sProcess(0, cputime,i*100,0,0,0));
                 i++;
             }
         }
