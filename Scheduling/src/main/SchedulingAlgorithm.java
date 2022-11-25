@@ -28,11 +28,17 @@ public class SchedulingAlgorithm {
         result.setSchedulingName("First-Come First-Served");
         try (PrintStream out = new PrintStream(new FileOutputStream(processFile))) {
             sProcess process = processVector.get(currentProcess);
-            out.println("Process: " + currentProcess + " registered... (" + process.getCputime() + " " + process.getIoblocking() + " " + process.getCpudone() + ")");
+            out.println("Process: " + currentProcess + " registered... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
             while (comptime < runtime) {
+                for (int i = 0; i < size; i++) {
+                    sProcess processTmp = processVector.get(i);
+                    if (processTmp.getArrivaltime() == comptime) {
+                        out.println("Process: " + i + " arrived... ( arrival_time:" + processTmp.getArrivaltime() + ", io_blocking:" + processTmp.getIoblocking() + ", done:" + processTmp.getCpudone() + "/" + processTmp.getCputime() + " )");
+                    }
+                }
                 if (process.getCpudone() == process.getCputime()) {
                     completed++;
-                    out.println("Process: " + currentProcess + " completed... (" + process.getCputime() + " " + process.getIoblocking() + " " + process.getCpudone() + ")");
+                    out.println("Process: " + currentProcess + " completed... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
                     if (completed == size) {
                         result.setCompuTime(comptime);
                         out.close();
@@ -45,10 +51,10 @@ public class SchedulingAlgorithm {
                         }
                     }
                     process = processVector.get(currentProcess);
-                    out.println("Process: " + currentProcess + " registered... (" + process.getCputime() + " " + process.getIoblocking() + " " + process.getCpudone() + ")");
+                    out.println("Process: " + currentProcess + " registered... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
                 }
                 if (process.getIoblocking() == process.getIonext()) {
-                    out.println("Process: " + currentProcess + " I/O blocked... (" + process.getCputime() + " " + process.getIoblocking() + " " + process.getCpudone() + ")");
+                    out.println("Process: " + currentProcess + " I/O blocked... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
                     process.setNumblocked(process.getNumblocked() + 1);
                     process.setIonext(0);
                     previousProcess = currentProcess;
@@ -59,7 +65,7 @@ public class SchedulingAlgorithm {
                         }
                     }
                     process = processVector.get(currentProcess);
-                    out.println("Process: " + currentProcess + " registered... (" + process.getCputime() + " " + process.getIoblocking() + " " + process.getCpudone() + ")");
+                    out.println("Process: " + currentProcess + " registered... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
                 }
                 process.setCpudone(process.getCpudone() + 1);
                 if (process.getIoblocking() > 0) {
