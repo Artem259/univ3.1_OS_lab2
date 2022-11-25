@@ -57,6 +57,7 @@ public class Scheduling {
         System.out.println("Working...");
 
         String line;
+        int currentId = 0;
         try (BufferedReader in = new BufferedReader(new FileReader(f))) {
             while ((line = in.readLine()) != null) {
                 if (line.startsWith("numprocess")) {
@@ -85,7 +86,8 @@ public class Scheduling {
                     }
                     X = X * standardDev;
                     int cputime = (int) X + meanDev;
-                    processVector.add(new sProcess(arrivaltime, cputime, ioblocking, 0, 0, 0));
+                    processVector.add(new sProcess(currentId, arrivaltime, cputime, ioblocking, 0, 0, 0));
+                    currentId++;
                 }
                 if (line.startsWith("runtime")) {
                     StringTokenizer st = new StringTokenizer(line);
@@ -107,7 +109,8 @@ public class Scheduling {
                 }
                 X = X * standardDev;
                 int cputime = (int) X + meanDev;
-                processVector.add(new sProcess(0, cputime,i*100,0,0,0));
+                processVector.add(new sProcess(currentId, 0, cputime,i*100,0,0,0));
+                currentId++;
                 i++;
             }
         }

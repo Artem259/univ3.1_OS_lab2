@@ -7,69 +7,81 @@ package main;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.util.*;
 
 public class SchedulingAlgorithm {
     private final String processFile;
+    private int comptime;
 
     public SchedulingAlgorithm(String processFile) {
         this.processFile = processFile;
     }
 
+    private void printProcess(PrintStream out, sProcess process, String action) {
+        out.println(comptime + " Process: " + process.getId() + " " + action + "... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
+    }
+
+    private sProcess getNextProcess(PriorityQueue<sProcess> processesQueue) {
+        return processesQueue.poll();
+    }
+
     public Results run(int runtime, ArrayList<sProcess> processVector) {
-        int comptime = 0;
-        int currentProcess = 0;
-        int previousProcess;
+        comptime = 0;
+        sProcess currentProcess = null;
         int size = processVector.size();
         int completed = 0;
+        int nextArrivalIndex = 0;
         Results result = new Results();
+        PriorityQueue<sProcess> processesQueue = new PriorityQueue<>(Comparator.comparing(sProcess::getIoblocking));
+
+        processVector.sort(Comparator.comparing(sProcess::getArrivaltime));
 
         result.setSchedulingType("Batch (Nonpreemptive)");
         result.setSchedulingName("First-Come First-Served");
         try (PrintStream out = new PrintStream(new FileOutputStream(processFile))) {
-            sProcess process = processVector.get(currentProcess);
-            out.println("Process: " + currentProcess + " registered... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
             while (comptime < runtime) {
-                for (int i = 0; i < size; i++) {
-                    sProcess processTmp = processVector.get(i);
-                    if (processTmp.getArrivaltime() == comptime) {
-                        out.println("Process: " + i + " arrived... ( arrival_time:" + processTmp.getArrivaltime() + ", io_blocking:" + processTmp.getIoblocking() + ", done:" + processTmp.getCpudone() + "/" + processTmp.getCputime() + " )");
+                if (nextArrivalIndex < size) {
+                    while (comptime == processVector.get(nextArrivalIndex).getArrivaltime()) {
+                        printProcess(out, processVector.get(nextArrivalIndex), "arrived");
+                        processesQueue.add(processVector.get(nextArrivalIndex));
+                        nextArrivalIndex++;
+                        if (nextArrivalIndex == size) {
+                            break;
+                        }
                     }
                 }
-                if (process.getCpudone() == process.getCputime()) {
+                if (currentProcess == null && !processesQueue.isEmpty()) {
+                    currentProcess = getNextProcess(processesQueue);
+                    printProcess(out, currentProcess, "registered");
+                }
+                if (currentProcess == null) {
+                    comptime++;
+                    continue;
+                }
+                if (currentProcess.getCpudone() == currentProcess.getCputime()) {
+                    printProcess(out, currentProcess, "completed");
                     completed++;
-                    out.println("Process: " + currentProcess + " completed... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
                     if (completed == size) {
                         result.setCompuTime(comptime);
                         out.close();
                         return result;
                     }
-                    for (int i = size - 1; i >= 0; i--) {
-                        process = processVector.get(i);
-                        if (process.getCpudone() < process.getCputime()) {
-                            currentProcess = i;
-                        }
-                    }
-                    process = processVector.get(currentProcess);
-                    out.println("Process: " + currentProcess + " registered... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
+                    currentProcess = null;
+                    continue;
                 }
-                if (process.getIoblocking() == process.getIonext()) {
-                    out.println("Process: " + currentProcess + " I/O blocked... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
-                    process.setNumblocked(process.getNumblocked() + 1);
-                    process.setIonext(0);
-                    previousProcess = currentProcess;
-                    for (int i = size - 1; i >= 0; i--) {
-                        process = processVector.get(i);
-                        if (process.getCpudone() < process.getCputime() && previousProcess != i) {
-                            currentProcess = i;
-                        }
-                    }
-                    process = processVector.get(currentProcess);
-                    out.println("Process: " + currentProcess + " registered... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
+                if (currentProcess.getIoblocking() == currentProcess.getIonext()) {
+                    printProcess(out, currentProcess, "I/O blocked");
+                    currentProcess.setNumblocked(currentProcess.getNumblocked() + 1);
+                    currentProcess.setIonext(0);
+
+                    sProcess previousProcess = currentProcess;
+                    currentProcess = getNextProcess(processesQueue);
+                    printProcess(out, currentProcess, "registered");
+                    processesQueue.add(previousProcess);
                 }
-                process.setCpudone(process.getCpudone() + 1);
-                if (process.getIoblocking() > 0) {
-                    process.setIonext(process.getIonext() + 1);
+                currentProcess.setCpudone(currentProcess.getCpudone() + 1);
+                if (currentProcess.getIoblocking() > 0) {
+                    currentProcess.setIonext(currentProcess.getIonext() + 1);
                 }
                 comptime++;
             }
