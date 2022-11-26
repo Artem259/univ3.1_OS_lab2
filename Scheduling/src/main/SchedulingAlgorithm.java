@@ -63,6 +63,7 @@ public class SchedulingAlgorithm {
                     completed++;
                     if (completed == size) {
                         result.setCompuTime(comptime);
+                        out.println("Completed.");
                         out.close();
                         return result;
                     }
