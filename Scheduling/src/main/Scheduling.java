@@ -30,7 +30,8 @@ public class Scheduling {
         int size = processVector.size();
         for (i = 0; i < size; i++) {
             sProcess process = processVector.get(i);
-            System.out.println("process " + i + " " + process.getCputime() + " " + process.getIoblocking() + " " + process.getCpudone() + " " + process.getNumblocked());
+            System.out.println("process " + i + " " + process.getCputime() + " "
+                    + process.getIoblocking() + " " + process.getCpudone() + " " + process.getNumblocked());
         }
         System.out.println("runtime " + runtime);
     }
@@ -86,7 +87,8 @@ public class Scheduling {
                     }
                     X = X * standardDev;
                     int cputime = (int) X + meanDev;
-                    processVector.add(new sProcess(currentId, arrivaltime, cputime, ioblocking, 0, 0, 0));
+                    processVector.add(new sProcess(
+                            currentId, arrivaltime, cputime, ioblocking, 0, 0, 0));
                     currentId++;
                 }
                 if (line.startsWith("runtime")) {
@@ -109,7 +111,8 @@ public class Scheduling {
                 }
                 X = X * standardDev;
                 int cputime = (int) X + meanDev;
-                processVector.add(new sProcess(currentId, 0, cputime,i*100,0,0,0));
+                processVector.add(new sProcess(
+                        currentId, 0, cputime,i*100,0,0,0));
                 currentId++;
                 i++;
             }

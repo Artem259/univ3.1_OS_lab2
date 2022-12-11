@@ -18,7 +18,10 @@ public class SchedulingAlgorithm {
     }
 
     private void printProcess(PrintStream out, sProcess process, String action) {
-        out.println(comptime + " Process: " + process.getId() + " " + action + "... ( arrival_time:" + process.getArrivaltime() + ", io_blocking:" + process.getIoblocking() + ", done:" + process.getCpudone() + "/" + process.getCputime() + " )");
+        out.println(comptime + " Process: " + process.getId() + " "
+                + action + "... ( arrival_time:" + process.getArrivaltime()
+                + ", io_blocking:" + process.getIoblocking() + ", done:"
+                + process.getCpudone() + "/" + process.getCputime() + " )");
     }
 
     private sProcess getNextProcess(PriorityQueue<sProcess> processesQueue) {
@@ -32,7 +35,8 @@ public class SchedulingAlgorithm {
         int completed = 0;
         int nextArrivalIndex = 0;
         Results result = new Results();
-        PriorityQueue<sProcess> processesQueue = new PriorityQueue<>(Comparator.comparing(sProcess::getIoblocking));
+        PriorityQueue<sProcess> processesQueue = new PriorityQueue<>(
+                Comparator.comparing(sProcess::getIoblocking));
 
         processVector.sort(Comparator.comparing(sProcess::getArrivaltime));
 
@@ -54,35 +58,39 @@ public class SchedulingAlgorithm {
                     currentProcess = getNextProcess(processesQueue);
                     printProcess(out, currentProcess, "registered");
                 }
-                if (currentProcess == null) {
-                    comptime++;
-                    continue;
-                }
-                if (currentProcess.getCpudone() == currentProcess.getCputime()) {
-                    printProcess(out, currentProcess, "completed");
-                    completed++;
-                    if (completed == size) {
-                        result.setCompuTime(comptime);
-                        out.println("Completed.");
-                        out.close();
-                        return result;
+                if (currentProcess != null) {
+                    if (currentProcess.getCpudone() == currentProcess.getCputime()) {
+                        printProcess(out, currentProcess, "completed");
+                        completed++;
+                        if (completed == size) {
+                            result.setCompuTime(comptime);
+                            out.println("Completed.");
+                            return result;
+                        }
+                        currentProcess = null;
+                        continue;
                     }
-                    currentProcess = null;
-                    continue;
-                }
-                if (currentProcess.getIoblocking() == currentProcess.getIonext()) {
-                    printProcess(out, currentProcess, "I/O blocked");
-                    currentProcess.setNumblocked(currentProcess.getNumblocked() + 1);
-                    currentProcess.setIonext(0);
+                    if (currentProcess.getIoblocking() == currentProcess.getIonext()) {
+                        printProcess(out, currentProcess, "I/O blocked");
+                        currentProcess.setNumblocked(currentProcess.getNumblocked() + 1);
+                        currentProcess.setIonext(0);
 
-                    sProcess previousProcess = currentProcess;
-                    currentProcess = getNextProcess(processesQueue);
-                    printProcess(out, currentProcess, "registered");
-                    processesQueue.add(previousProcess);
+                        if (!processesQueue.isEmpty()) {
+                            sProcess previousProcess = currentProcess;
+                            currentProcess = getNextProcess(processesQueue);
+                            printProcess(out, currentProcess, "registered");
+                            processesQueue.add(previousProcess);
+                        } else {
+                            processesQueue.add(currentProcess);
+                            currentProcess = null;
+                        }
+                    }
                 }
-                currentProcess.setCpudone(currentProcess.getCpudone() + 1);
-                if (currentProcess.getIoblocking() > 0) {
-                    currentProcess.setIonext(currentProcess.getIonext() + 1);
+                if (currentProcess != null) {
+                    currentProcess.setCpudone(currentProcess.getCpudone() + 1);
+                    if (currentProcess.getIoblocking() > 0) {
+                        currentProcess.setIonext(currentProcess.getIonext() + 1);
+                    }
                 }
                 comptime++;
             }

@@ -19,7 +19,8 @@ public class sProcess {
         this.numblocked = 0;
     }
 
-    public sProcess(int id, int arrivaltime, int cputime, int ioblocking, int cpudone, int ionext, int numblocked) {
+    public sProcess(int id, int arrivaltime, int cputime, int ioblocking,
+                    int cpudone, int ionext, int numblocked) {
         this.id = id;
         this.arrivaltime = arrivaltime;
         this.cputime = cputime;
